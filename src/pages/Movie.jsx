@@ -7,22 +7,44 @@ const Movie = () => {
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(null);
   const [movies, setMovies] = useState([]);
+  const [editingId, setEditingId] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newMovie = { id: Date.now(), name, genre, rating };
-    setMovies([...movies, newMovie]);
+
+    if (editingId) {
+      setMovies((prev) =>
+        prev.map((movie) =>
+          movie.id === editingId ? { ...movie, name, genre, rating } : movie
+        )
+      );
+      setEditingId(null);
+    } else {
+      const newMovie = { id: Date.now(), name, genre, rating };
+      setMovies([...movies, newMovie]);
+    }
 
     setName("");
     setGenre("");
     setRating(0);
   };
 
+  const handleDelete = (id) => {
+    setMovies(movies.filter((movie) => movie.id !== id));
+  };
+
+  const handleEdit = (movie) => {
+    setEditingId(movie.id);
+    setName(movie.name);
+    setGenre(movie.genre);
+    setRating(movie.rating);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4">
       <div className="max-w-xl mx-auto bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
-          Add a Movie 🎬
+          {editingId ? "Update Movie " : "Add a Movie "}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -62,7 +84,7 @@ const Movie = () => {
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
           >
-            Add Movie
+            {editingId ? "Update Movie" : "Add Movie"}
           </button>
         </form>
       </div>
@@ -72,7 +94,7 @@ const Movie = () => {
           {movies.map((movie) => (
             <div
               key={movie.id}
-              className="bg-white border rounded shadow-md p-4"
+              className="bg-white border rounded shadow-md p-4 space-y-2"
             >
               <p>
                 <strong className="text-gray-700">Name:</strong> {movie.name}
@@ -83,6 +105,20 @@ const Movie = () => {
               <p>
                 <strong className="text-gray-700">Rating:</strong> {movie.rating}
               </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(movie)}
+                  className="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={() => handleDelete(movie.id)}
+                  className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -91,4 +127,4 @@ const Movie = () => {
   );
 };
 
-export default Movie;
+export default React.memo(Movie);
